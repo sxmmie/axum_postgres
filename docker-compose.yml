@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: axum_postgres_db
+    environment:
+      POSTGRES_USER: axum_postgres
+      POSTGRES_PASSWORD: adminPass
+      POSTGRES_DB: axum_postgres_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: axum_postgres_api
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SERVER_ADDRESS: ${SERVER_ADDRESS}
+    ports:
+      - "7878:7878"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
