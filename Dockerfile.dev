@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1.7
+
+FROM rust:1.91--bookworm-slim AS dev
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config libssl-dev ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN cargo install cargo-watch --locked
+
+# Pre-copy manifests so `cargo fetch` layer caches independently of source changes
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir src && echo "fn main() {}" > src/main.rs \
+    && cargo fetch \
+    && rm -rf src
+
+COPY . .
+
+ENV SQLX_OFFLINE=true
+ENV RUST_LOG=debug
+ENV RUST_BACKTRACE=1
+
+EXPOSE 7878
+
+CMD ["cargo", "watch", "-x", "run"]

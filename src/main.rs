@@ -1,5 +1,10 @@
-use axum::{Router, routing::get};
-use sqlx::postgres::PgPoolOptions;
+use axum::{
+	Router,
+	extract::State,
+	http::StatusCode,
+	routing::{delete, get, patch},
+};
+use sqlx::{PgPool, postgres::PgPoolOptions};
 use tokio::net::TcpListener;
 
 #[tokio::main]
@@ -25,8 +30,22 @@ async fn main() {
 	println!("Server running on {}", listener.local_addr().unwrap()); // if successful, print the server address to the console
 
 	// compose the routes
-	let app = Router::new().route("/", get(|| async { "Hello, World!" }));
+	let app = Router::new()
+		.route("/", get(|| async { "Hello, World!" }))
+		.route("/tasks", get(get_tasks))
+		.route("/tasks", delete(delete_task))
+		.route("/tasks/:id", get(get_task_by_id))
+		.route("/tasks/:id", patch(update_task_by_id))
+		.with_state(db_pool); // pass the database connection pool to the app state, so each route handler can access it
 
 	// run/serve server
 	axum::serve(listener, app).await.expect("Failed to start the server");
 }
+
+async fn get_tasks(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {}
+
+async fn create_tasks(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {}
+
+async fn get_task_by_id(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {}
+
+async fn update_task_by_id(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {}
