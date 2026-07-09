@@ -5,6 +5,8 @@ use axum::{
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
+use crate::controller::{create_tasks, delete_task, get_task_by_id, get_tasks, update_task_by_id};
+
 mod controller;
 
 #[tokio::main]
