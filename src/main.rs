@@ -1,11 +1,11 @@
 use axum::{
 	Router,
-	extract::State,
-	http::StatusCode,
 	routing::{delete, get, patch},
 };
-use sqlx::{PgPool, postgres::PgPoolOptions};
+use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
+
+mod controller;
 
 #[tokio::main]
 async fn main() {
@@ -41,11 +41,3 @@ async fn main() {
 	// run/serve server
 	axum::serve(listener, app).await.expect("Failed to start the server");
 }
-
-async fn get_tasks(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {}
-
-async fn create_tasks(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {}
-
-async fn get_task_by_id(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {}
-
-async fn update_task_by_id(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {}
