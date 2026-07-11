@@ -50,6 +50,12 @@ pub async fn get_task_by_id(State(pg_pool): State<PgPool>) -> Result<(StatusCode
 	todo!()
 }
 
+#[derive(Deserialize)]
+struct UpdateTaskReq {
+	name: Option<String>,
+	priority: Option<i32>,
+}
+
 pub async fn update_task_by_id(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {
 	todo!()
 }
