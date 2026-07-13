@@ -1,6 +1,10 @@
 use core::task;
 
-use axum::{Json, extract::State, http::StatusCode};
+use axum::{
+	Json,
+	extract::{Path, State},
+	http::StatusCode,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::PgPool;
@@ -59,7 +63,7 @@ struct UpdateTaskReq {
 }
 
 pub async fn update_task_by_id(State(pg_pool): State<PgPool>, Path(task_id): Path<i32>, Json(payload): Json<UpdateTaskReq>) -> Result<(StatusCode, String), (StatusCode, String)> {
-	sqlx = sqlx::query!(
+	let row = sqlx = sqlx::query!(
 		"UPDATE tasks SET name = COALESCE($1, name), priority = COALESCE($2, priority) WHERE task_id = $3",
 		payload.name,
 		payload.priority,
