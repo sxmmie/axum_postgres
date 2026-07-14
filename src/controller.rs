@@ -68,12 +68,12 @@ pub async fn update_task_by_id(State(pg_pool): State<PgPool>, Path(task_id): Pat
 	let mut i = 2;
 
 	if payload.name.is_some() {
-		query.push(&format!(", name = ${i}"));
+		query.push_str(&format!(", name = ${i}"));
 		i = i + 1;
 	};
 
 	if payload.priority.is_some() {
-		query.push(&format!(", priority = ${i}"));
+		query.push_str(&format!(", priority = ${i}"));
 	}
 
 	query.push_str(&format!(" WHERE task_id = $1"));
