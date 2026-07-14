@@ -63,19 +63,39 @@ struct UpdateTaskReq {
 }
 
 pub async fn update_task_by_id(State(pg_pool): State<PgPool>, Path(task_id): Path<i32>, Json(payload): Json<UpdateTaskReq>) -> Result<(StatusCode, String), (StatusCode, String)> {
-	sqlx::query!(
-		"UPDATE tasks SET name = COALESCE($1, name), priority = COALESCE($2, priority) WHERE task_id = $3",
-		payload.name,
-		payload.priority,
-		task_id
-	)
-	.execute(&pg_pool)
-	.await
-	.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, json!({ "success": false, "message": e.to_string()}).to_string()))?;
+	let mut  query = "UPDATE tasks SET tasks_id = $1".to_owned();
+
+	let mut i = 2;
+
+	if payload.name.is_some() {
+		query.push(&format!(", name = ${i}"));
+		i = i + 1;
+	};
+
+	if payload.priority.is_some() {
+		query.push(&format!(", priority = ${i}"));
+	}
+
+	query.push_str(&format!(" WHERE task_id = $1"));
+
+	// sqlx::query!(
+	// 	"UPDATE tasks SET name = COALESCE($1, name), priority = COALESCE($2, priority) WHERE task_id = $3",
+	// 	payload.name,
+	// 	payload.priority,
+	// 	task_id
+	// )
+	// .execute(&pg_pool)
+	// .await
+	// .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, json!({ "success": false, "message": e.to_string()}).to_string()))?;
 
 	Ok((StatusCode::OK, json!({ "success": true, "message": "Task updated successfully" }).to_string()))
 }
 
 pub async fn delete_task(State(pg_pool): State<PgPool>, Path(task_id): Path<i32>) -> Result<(StatusCode, String), (StatusCode, String)> {
-	sqlx::query!("DELETE FROM tasks WHERE id = $1", tas)
+	sqlx::query!("DELETE FROM tasks WHERE id = $1", task_id)
+	.execute(&pg_pool)
+	.await
+	.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, json!({"sucess": false, "message": e.to_string()}).to_string()))?
+	
+	Ok((StatusCode::OK, json!({"success": true, "message": "Task deleted successfully"}).to_string()))
 }
