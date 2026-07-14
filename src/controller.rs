@@ -78,6 +78,21 @@ pub async fn update_task_by_id(State(pg_pool): State<PgPool>, Path(task_id): Pat
 
 	query.push_str(&format!(" WHERE task_id = $1"));
 
+	// complie time checking wouldn't be suitable, so we call the query function and not the macro.
+	let mut s = sqlx::query(&query).bind(task_id);
+
+	if payload.name.is_some() {
+		s = s.bind(payload.name);
+	}
+
+	if payload.priority.is_some() {
+		s = s.bind(payload.priority);
+	}
+
+	s.execute(&pg_pool)
+	.await
+	.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, json!({ "success": false, "message": e.to_string()}).to_string()))?
+
 	// sqlx::query!(
 	// 	"UPDATE tasks SET name = COALESCE($1, name), priority = COALESCE($2, priority) WHERE task_id = $3",
 	// 	payload.name,
