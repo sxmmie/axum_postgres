@@ -52,8 +52,17 @@ pub async fn create_tasks(State(pg_pool): State<PgPool>, Json(task): Json<Create
 	Ok((StatusCode::OK, json!({ "success": true, "data": row }).to_string()))
 }
 
-pub async fn get_task_by_id(State(pg_pool): State<PgPool>) -> Result<(StatusCode, String), (StatusCode, String)> {
-	todo!()
+pub async fn get_task_by_id(State(pg_pool): State<PgPool>, Path(task_id): Path<i32>) -> Result<(StatusCode, String), (StatusCode, String)> {
+	let row = sqlx::query_as!(
+		CreateTaskRow,
+		"SELECT task_id, name, priority FROM tasks WHERE task_id = $1",
+		task_id
+	)
+	.fetch_one(&pg_pool)
+	.await
+	.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, json!({ "success": false, "message": e.to_string()}).to_string()))?;
+
+	Ok((StatusCode::OK, json!({ "success": true, "data": row }).to_string()))
 }
 
 #[derive(Deserialize)]
@@ -111,6 +120,6 @@ pub async fn delete_task(State(pg_pool): State<PgPool>, Path(task_id): Path<i32>
 	.execute(&pg_pool)
 	.await
 	.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, json!({"sucess": false, "message": e.to_string()}).to_string()))?
-	
+
 	Ok((StatusCode::OK, json!({"success": true, "message": "Task deleted successfully"}).to_string()))
 }
